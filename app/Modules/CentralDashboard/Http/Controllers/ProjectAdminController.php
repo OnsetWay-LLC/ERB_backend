@@ -8,6 +8,8 @@ use App\Modules\CentralDashboard\Http\Resources\ProjectAdminResource;
 use App\Modules\CentralDashboard\Repositories\ProjectAdminRepository;
 use App\Modules\CentralDashboard\Services\ProjectAdminService;
 use App\Modules\CentralDashboard\Http\Requests\UpdateProjectAdminRequest;
+use App\Modules\CentralDashboard\Http\Requests\StoreFirstProjectAdminRequest;
+use App\Models\ProjectAdmin;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 //to add admins
@@ -82,5 +84,34 @@ class ProjectAdminController extends Controller
             'message' => 'Project admin deleted successfully.',
         ]);
     }
+    
+   public function storeFirstAdmin(StoreFirstProjectAdminRequest $request): JsonResponse
+{
+    if (ProjectAdmin::count() > 0) {
+        return response()->json([
+            'message' => 'The first admin has already been created.',
+        ], 403);
+    }
+
+    $admin = ProjectAdmin::create([
+        'name' => $request->name,
+        'email' => $request->email,
+        'password' => $request->password,
+        'role' => $request->role,
+        'is_active' => true,
+    ]);
+
+    return response()->json([
+        'message' => 'First super admin created successfully.',
+        'data' => [
+            'id' => $admin->id,
+            'name' => $admin->name,
+            'email' => $admin->email,
+            'role' => $admin->role,
+            'is_active' => $admin->is_active,
+            'created_at' => $admin->created_at?->format('Y-m-d H:i:s'),
+        ],
+    ], 201);
+}
    
 }

@@ -11,16 +11,12 @@ class LicenseRequest extends Model
     protected $fillable = [
         'company_name',
         'owner_name',
-        'username',
         'email',
-        'password',
-        'email_verified_at',
+        'phone',
         'status',
+        'notes',
+        'email_verified_at',
         'requested_at',
-    ];
-
-    protected $hidden = [
-        'password',
     ];
 
     protected $casts = [

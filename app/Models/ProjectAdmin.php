@@ -22,6 +22,7 @@ class ProjectAdmin extends Authenticatable implements JWTSubject
 
     protected $casts = [
         'is_active' => 'boolean',
+        'password' => 'hashed',
     ];
 
     public function getJWTIdentifier()

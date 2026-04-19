@@ -15,13 +15,16 @@ return new class extends Migration
                 ->constrained('license_requests')
                 ->cascadeOnDelete();
 
-            $table->string('database_name')->nullable();
-            $table->string('server_host')->nullable();
-            $table->string('server_port')->nullable();
-            $table->string('database_username')->nullable();
-            $table->text('database_password')->nullable();
-            $table->string('backend_path')->nullable();
+            $table->enum('device_type', ['master', 'client'])->default('master');
+            $table->string('device_name')->nullable();
             $table->string('master_device_name')->nullable();
+
+            $table->string('server_host')->nullable();
+            $table->unsignedInteger('server_port')->nullable();
+            $table->string('database_name')->nullable();
+            $table->string('backend_path')->nullable();
+
+            $table->string('installation_code')->unique()->nullable();
 
             $table->enum('installation_status', [
                 'pending',

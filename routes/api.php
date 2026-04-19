@@ -1,5 +1,6 @@
 <?php
 use Illuminate\Support\Facades\Route;
+use App\Modules\CentralDashboard\Http\Controllers\ProjectAdminController;
 
 
 Route::get('/health', function () {
@@ -8,3 +9,4 @@ Route::get('/health', function () {
         'message' => 'Backend is running',
     ]);
 });
+Route::post('/central-dashboard/setup/first-admin', [ProjectAdminController::class, 'storeFirstAdmin']);

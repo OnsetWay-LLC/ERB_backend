@@ -15,16 +15,17 @@ return new class extends Migration
                 ->constrained('license_requests')
                 ->cascadeOnDelete();
 
-           $table->foreignId('client_installation_id')
-    ->nullable()
-    ->constrained('client_installations');
+            $table->foreignId('client_installation_id')
+                ->constrained('client_installations')
+                ->noActionOnDelete();
 
             $table->enum('license_type', ['initial', 'renewal'])
                 ->default('initial');
 
-           $table->foreignId('parent_license_id')
+          $table->foreignId('parent_license_id')
     ->nullable()
-    ->constrained('licenses');
+    ->constrained('licenses')
+    ->noActionOnDelete();
 
             $table->string('activation_token_hash');
             $table->string('activation_token_hint', 3)->nullable();
@@ -40,6 +41,7 @@ return new class extends Migration
             $table->timestamp('activated_at')->nullable();
             $table->timestamp('token_expires_at')->nullable();
             $table->timestamp('used_at')->nullable();
+            $table->timestamp('renewal_reminder_sent_at')->nullable();
 
             $table->enum('status', [
                 'generated',

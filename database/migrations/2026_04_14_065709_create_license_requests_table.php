@@ -13,13 +13,8 @@ return new class extends Migration
 
             $table->string('company_name')->nullable();
             $table->string('owner_name');
-            $table->string('username');
             $table->string('email')->unique();
-
-            // إذا بدك تخزنيها مؤقتًا لازم تكون hashed
-            $table->string('password')->nullable();
-
-            $table->timestamp('email_verified_at')->nullable();
+            $table->string('phone')->nullable();
 
             $table->enum('status', [
                 'pending',
@@ -30,6 +25,8 @@ return new class extends Migration
                 'blocked',
             ])->default('pending');
 
+            $table->text('notes')->nullable();
+            $table->timestamp('email_verified_at')->nullable();
             $table->timestamp('requested_at')->nullable();
 
             $table->timestamps();

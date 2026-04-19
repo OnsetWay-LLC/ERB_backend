@@ -11,19 +11,21 @@ class ClientInstallation extends Model
 {
     protected $fillable = [
         'license_request_id',
-        'database_name',
+        'device_type',
+        'device_name',
+        'master_device_name',
         'server_host',
         'server_port',
-        'database_username',
-        'database_password',
+        'database_name',
         'backend_path',
-        'master_device_name',
+        'installation_code',
         'installation_status',
         'installed_at',
     ];
 
     protected $casts = [
         'installed_at' => 'datetime',
+        'server_port' => 'integer',
     ];
 
     public function licenseRequest(): BelongsTo
@@ -33,12 +35,12 @@ class ClientInstallation extends Model
 
     public function licenses(): HasMany
     {
-        return $this->hasMany(License::class);
+        return $this->hasMany(License::class, 'client_installation_id');
     }
 
     public function activeLicense(): HasOne
     {
-        return $this->hasOne(License::class)
+        return $this->hasOne(License::class, 'client_installation_id')
             ->where('status', 'active')
             ->latestOfMany();
     }

@@ -22,9 +22,9 @@ class License extends Model
         'activated_at',
         'token_expires_at',
         'used_at',
+        'renewal_reminder_sent_at',
         'status',
         'generated_by',
-        'renewal_reminder_sent_at',
     ];
 
     protected $casts = [
@@ -42,7 +42,7 @@ class License extends Model
         return $this->belongsTo(LicenseRequest::class);
     }
 
-    public function installation(): BelongsTo
+    public function clientInstallation(): BelongsTo
     {
         return $this->belongsTo(ClientInstallation::class, 'client_installation_id');
     }
@@ -65,5 +65,23 @@ class License extends Model
     public function logs(): HasMany
     {
         return $this->hasMany(LicenseLog::class);
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('status', 'active');
+    }
+
+    public function scopeGenerated($query)
+    {
+        return $query->where('status', 'generated');
+    }
+
+    public function scopeNotExpired($query)
+    {
+        return $query->where(function ($q) {
+            $q->whereNull('expires_at')
+              ->orWhere('expires_at', '>', now());
+        });
     }
 }

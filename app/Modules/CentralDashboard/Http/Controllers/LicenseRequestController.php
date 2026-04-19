@@ -3,43 +3,76 @@
 namespace App\Modules\CentralDashboard\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Modules\CentralDashboard\Http\Resources\LicenseRequestDetailResource;
+use App\Models\LicenseRequest;
+use App\Modules\CentralDashboard\Http\Requests\StoreLicenseRequestRequest;
+use App\Modules\CentralDashboard\Http\Requests\UpdateLicenseRequestRequest;
 use App\Modules\CentralDashboard\Http\Resources\LicenseRequestResource;
-use App\Modules\CentralDashboard\Repositories\LicenseRequestRepository;
+use App\Modules\CentralDashboard\Services\LicenseRequestService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class LicenseRequestController extends Controller
 {
     public function __construct(
-        protected LicenseRequestRepository $repository
+        protected LicenseRequestService $service
     ) {}
 
     public function index(Request $request): JsonResponse
     {
-        $perPage = (int) $request->get('per_page', 10);
-
-        $licenseRequests = $this->repository->paginateWithLatestLicense($perPage);
+        $licenseRequests = $this->service->getAll($request->only([
+            'search',
+            'status',
+            'per_page',
+        ]));
 
         return response()->json([
-            'message' => 'License requests fetched successfully.',
-            'data'    => LicenseRequestResource::collection($licenseRequests),
-            'meta'    => [
+            'message' => 'Client requests retrieved successfully.',
+            'data' => LicenseRequestResource::collection($licenseRequests),
+            'meta' => [
                 'current_page' => $licenseRequests->currentPage(),
-                'last_page'    => $licenseRequests->lastPage(),
-                'per_page'     => $licenseRequests->perPage(),
-                'total'        => $licenseRequests->total(),
+                'last_page' => $licenseRequests->lastPage(),
+                'per_page' => $licenseRequests->perPage(),
+                'total' => $licenseRequests->total(),
             ],
         ]);
     }
 
-    public function show(int $id): JsonResponse
+    public function store(StoreLicenseRequestRequest $request): JsonResponse
     {
-        $licenseRequest = $this->repository->findById($id);
+        $licenseRequest = $this->service->create($request->validated());
 
         return response()->json([
-            'message' => 'License request details fetched successfully.',
-            'data'    => new LicenseRequestDetailResource($licenseRequest),
+            'message' => 'Client request created successfully.',
+            'data' => new LicenseRequestResource($licenseRequest),
+        ], 201);
+    }
+
+    public function show(int $id): JsonResponse
+    {
+        $licenseRequest = $this->service->getById($id);
+
+        return response()->json([
+            'message' => 'Client request retrieved successfully.',
+            'data' => new LicenseRequestResource($licenseRequest),
+        ]);
+    }
+
+    public function update(UpdateLicenseRequestRequest $request, int $id): JsonResponse
+    {
+        $licenseRequest = $this->service->update($id, $request->validated());
+
+        return response()->json([
+            'message' => 'Client request updated successfully.',
+            'data' => new LicenseRequestResource($licenseRequest),
+        ]);
+    }
+
+    public function destroy(int $id): JsonResponse
+    {
+        $this->service->delete($id);
+
+        return response()->json([
+            'message' => 'Client request deleted successfully.',
         ]);
     }
 }
