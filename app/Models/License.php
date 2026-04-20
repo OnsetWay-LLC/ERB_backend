@@ -42,10 +42,10 @@ class License extends Model
         return $this->belongsTo(LicenseRequest::class);
     }
 
-    public function clientInstallation(): BelongsTo
-    {
-        return $this->belongsTo(ClientInstallation::class, 'client_installation_id');
-    }
+   public function installation(): BelongsTo
+{
+    return $this->belongsTo(ClientInstallation::class, 'client_installation_id');
+}
 
     public function generator(): BelongsTo
     {

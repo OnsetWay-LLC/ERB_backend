@@ -18,7 +18,6 @@ class GenerateRenewalLicenseRequest extends FormRequest
             'client_installation_id' => ['required', 'integer', 'exists:client_installations,id'],
             'duration_type' => ['required', 'in:fourteen_days,one_year'],
             'generated_by' => ['nullable', 'integer', 'exists:project_admins,id'],
-            'renewal_reminder_sent_at' => ['nullable', 'date'],
         ];
     }
 }

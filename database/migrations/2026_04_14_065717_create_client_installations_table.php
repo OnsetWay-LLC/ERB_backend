@@ -14,18 +14,10 @@ return new class extends Migration
             $table->foreignId('license_request_id')
                 ->constrained('license_requests')
                 ->cascadeOnDelete();
-
-            $table->enum('device_type', ['master', 'client'])->default('master');
             $table->string('device_name')->nullable();
-            $table->string('master_device_name')->nullable();
-
             $table->string('server_host')->nullable();
             $table->unsignedInteger('server_port')->nullable();
             $table->string('database_name')->nullable();
-            $table->string('backend_path')->nullable();
-
-            $table->string('installation_code')->unique()->nullable();
-
             $table->enum('installation_status', [
                 'pending',
                 'database_created',
@@ -38,7 +30,6 @@ return new class extends Migration
             $table->timestamps();
         });
     }
-
     public function down(): void
     {
         Schema::dropIfExists('client_installations');

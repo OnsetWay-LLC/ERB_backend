@@ -22,6 +22,7 @@ class ProjectAdminController extends Controller
 
     public function index(Request $request): JsonResponse
     {
+         $this->ensureCanManageAdmins();
         $perPage = (int) $request->get('per_page', 10);
 
         $admins = $this->repository->paginate($perPage);
@@ -40,6 +41,7 @@ class ProjectAdminController extends Controller
 
     public function store(StoreProjectAdminRequest $request): JsonResponse
     {
+         $this->ensureCanManageAdmins();
         $admin = $this->service->create($request->validated());
 
         return response()->json([
@@ -50,6 +52,7 @@ class ProjectAdminController extends Controller
 
     public function show(int $id): JsonResponse
     {
+         $this->ensureCanManageAdmins();
         $admin = $this->repository->findById($id);
 
         return response()->json([
@@ -59,6 +62,7 @@ class ProjectAdminController extends Controller
     }
    public function update(UpdateProjectAdminRequest $request, int $id): JsonResponse
 {
+     $this->ensureCanManageAdmins();
     $admin = $this->repository->findById($id);
 
     $data = $request->validated();
@@ -78,6 +82,7 @@ class ProjectAdminController extends Controller
 }
     public function destroy(int $id): JsonResponse
     {
+         $this->ensureCanManageAdmins();
         $this->service->delete($id);
 
         return response()->json([
@@ -113,5 +118,12 @@ class ProjectAdminController extends Controller
         ],
     ], 201);
 }
-   
+protected function ensureCanManageAdmins(): void
+{
+    $admin = auth('project_admin')->user();
+
+    if (! $admin || $admin->role === 'support_admin') {
+        abort(403, 'You are not authorized to manage admins.');
+    }
+}
 }

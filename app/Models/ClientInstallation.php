@@ -11,14 +11,10 @@ class ClientInstallation extends Model
 {
     protected $fillable = [
         'license_request_id',
-        'device_type',
         'device_name',
-        'master_device_name',
         'server_host',
         'server_port',
         'database_name',
-        'backend_path',
-        'installation_code',
         'installation_status',
         'installed_at',
     ];

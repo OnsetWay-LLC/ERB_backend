@@ -5,6 +5,7 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\EnsureProjectAdminCanAccessDashboard;
+use App\Http\Middleware\EnsureCanManageProjectAdmins;
 
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -21,7 +22,8 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
           $middleware->alias([
-        'project_admin.active' => \App\Http\Middleware\EnsureProjectAdminCanAccessDashboard::class,
+        'project_admin.active' => EnsureProjectAdminCanAccessDashboard::class,
+            'project_admin.manage' => EnsureCanManageProjectAdmins::class,
     ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

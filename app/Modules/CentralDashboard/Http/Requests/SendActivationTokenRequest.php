@@ -18,4 +18,11 @@ class SendActivationTokenRequest extends FormRequest
             'activation_token' => ['required', 'string', 'size:7'],
         ];
     }
+
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'activation_token' => strtoupper(trim((string) $this->activation_token)),
+        ]);
+    }
 }

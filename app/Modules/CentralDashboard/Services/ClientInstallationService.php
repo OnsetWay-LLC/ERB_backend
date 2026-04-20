@@ -3,49 +3,57 @@
 namespace App\Modules\CentralDashboard\Services;
 
 use App\Models\ClientInstallation;
-use Illuminate\Support\Facades\Crypt;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class ClientInstallationService
 {
-    public function create(array $data): ClientInstallation
+    public function getAll(array $filters = []): LengthAwarePaginator
     {
-        return ClientInstallation::create([
-            'license_request_id' => $data['license_request_id'],
-            'database_name' => $data['database_name'] ?? null,
-            'server_host' => $data['server_host'] ?? null,
-            'server_port' => $data['server_port'] ?? null,
-            'database_username' => $data['database_username'] ?? null,
-            'database_password' => isset($data['database_password'])
-                ? Crypt::encryptString($data['database_password'])
-                : null,
-            'backend_path' => $data['backend_path'] ?? null,
-            'master_device_name' => $data['master_device_name'] ?? null,
-            'installation_status' => $data['installation_status'] ?? 'pending',
-            'installed_at' => $data['installed_at'] ?? null,
-        ]);
-    }
+        $perPage = $filters['per_page'] ?? 10;
 
-    public function update(ClientInstallation $installation, array $data): ClientInstallation
-    {
-        $payload = [
-            'database_name' => $data['database_name'] ?? $installation->database_name,
-            'server_host' => $data['server_host'] ?? $installation->server_host,
-            'server_port' => $data['server_port'] ?? $installation->server_port,
-            'database_username' => $data['database_username'] ?? $installation->database_username,
-            'backend_path' => $data['backend_path'] ?? $installation->backend_path,
-            'master_device_name' => $data['master_device_name'] ?? $installation->master_device_name,
-            'installation_status' => $data['installation_status'] ?? $installation->installation_status,
-            'installed_at' => $data['installed_at'] ?? $installation->installed_at,
-        ];
+        $query = ClientInstallation::query()->latest();
 
-        if (array_key_exists('database_password', $data) && ! empty($data['database_password'])) {
-            $payload['database_password'] = Crypt::encryptString($data['database_password']);
+        if (!empty($filters['search'])) {
+            $search = trim($filters['search']);
+
+            $query->where(function ($q) use ($search) {
+                $q->where('device_name', 'like', "%{$search}%")
+                  ->orWhere('server_host', 'like', "%{$search}%")
+                  ->orWhere('database_name', 'like', "%{$search}%")
+                 ;
+            });
         }
 
-        $installation->update($payload);
+       
 
-        return $installation->fresh(['licenseRequest', 'activeLicense']);
+        if (!empty($filters['installation_status'])) {
+            $query->where('installation_status', $filters['installation_status']);
+        }
+
+        if (!empty($filters['license_request_id'])) {
+            $query->where('license_request_id', $filters['license_request_id']);
+        }
+
+        return $query->paginate($perPage);
     }
 
-   
+    public function create(array $data): ClientInstallation
+    {
+        $data['installation_status'] = $data['installation_status'] ?? 'pending';
+
+        return ClientInstallation::create($data);
+    }
+
+    public function getById(int $id): ClientInstallation
+    {
+        return ClientInstallation::findOrFail($id);
+    }
+
+    public function update(int $id, array $data): ClientInstallation
+    {
+        $installation = $this->getById($id);
+        $installation->update($data);
+
+        return $installation->refresh();
+    }
 }
