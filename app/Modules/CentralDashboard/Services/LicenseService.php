@@ -23,6 +23,11 @@ class LicenseService
             ]);
         }
 
+        $this->ensureNoPendingLicense(
+            clientInstallationId: (int) $data['client_installation_id'],
+            licenseType: 'initial'
+        );
+
         $plainToken = $this->generateActivationToken();
 
         $license = License::create([
@@ -61,6 +66,25 @@ class LicenseService
         }
 
         return $token;
+    }
+
+    private function ensureNoPendingLicense(int $clientInstallationId, string $licenseType): void
+    {
+        $existingPendingLicense = License::where('client_installation_id', $clientInstallationId)
+            ->where('license_type', $licenseType)
+            ->whereIn('status', ['generated', 'sent'])
+            ->latest('id')
+            ->first();
+
+        if ($existingPendingLicense) {
+            $typeLabel = $licenseType === 'renewal' ? 'renewal' : 'initial';
+
+            throw ValidationException::withMessages([
+                'client_installation_id' => [
+                    "A pending {$typeLabel} license already exists for this installation."
+                ],
+            ]);
+        }
     }
 
     public function sendToken(array $data): License
@@ -229,6 +253,11 @@ class LicenseService
                 ]);
             }
         }
+
+        $this->ensureNoPendingLicense(
+            clientInstallationId: (int) $data['client_installation_id'],
+            licenseType: 'renewal'
+        );
 
         $plainToken = $this->generateActivationToken();
 
